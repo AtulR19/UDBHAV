@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Speech Analyzer</title>
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            background-color: #f4f7f6;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 800px;
+            width: 100%;
+            margin: 0 auto;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.07);
+            overflow: hidden;
+        }
+        .page { padding: 32px 40px; }
+        h1 { text-align: center; color: #333; margin-top: 0; }
+        h2 { text-align: center; border-bottom: 2px solid #eee; padding-bottom: 10px; margin-top: 30px; }
+        h3 { margin-top: 24px; color: #333; }
+        p { color: #555; font-size: 1.1em; }
+        
+        #apiKeyScreen, #uploadScreen, #reviewScreen { display: block; }
+        #reviewScreen { display: none; }
+
+        label {
+            font-weight: 600;
+            display: block;
+            margin-bottom: 8px;
+            color: #444;
+        }
+        label[for="audioFile"], label[for="audience"] { margin-top: 20px; }
+        
+        input[type="password"], input[type="file"], input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 16px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-size: 1em;
+        }
+        input[type="file"] { padding: 10px; background: #fdfdfd; }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            background-color: #007aff;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        button:hover { background-color: #0056b3; }
+        button:disabled { background-color: #ccc; cursor: not-allowed; }
+
+        #loading, #error {
+            text-align: center;
+            font-size: 1.1em;
+            padding: 20px 0;
+            display: none;
+        }
+        #error { color: #d93025; font-weight: 600; }
+        #loading { color: #555; }
+
+        #reportContainer {
+            white-space: pre-wrap;
+            background: #f9f9f9;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+            font-family: "Courier New", Courier, monospace;
+            color: #333;
+        }
+        
+        #starRating {
+            text-align: center;
+            font-size: 2.5em;
+            color: #FFD700;
+            margin-bottom: 10px;
+        }
+        #starRating .empty-star { color: #ddd; }
+
+        /* *** NEW: Style for the Filler Word List *** */
+        #fillerWordContainer ul {
+            list-style-type: none;
+            padding-left: 0;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        #fillerWordContainer li {
+            background: #eee;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 0.9em;
+        }
+        #fillerWordContainer li strong { color: #000; }
+        
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div id="apiKeyScreen" class="page">
+            <h1>Welcome to the AI Speech Analyzer 👋</h1>
+            <p>Please enter your Google AI Studio (Gemini) API Key to begin.</p>
+            <label for="apiKey">Gemini API Key:</label>
+            <input type="password" id="apiKey" placeholder="Enter your API key...">
+            <button id="submitKeyBtn">Submit Key</button>
+        </div>
+
+        <div id="uploadScreen" class="page" style="display: none;">
+            <h1>Upload Your Speech</h1>
+            <p>Your API key is set. Now, tell us who you're speaking to and upload your audio file.</p>
+            
+            <form id="uploadForm">
+                <label for="audience">Who is the audience?</label>
+                <input type="text" id="audience" placeholder="e.g., 'My boss', 'A history class', 'A tech conference'">
+                
+                <label for="audioFile">Audio File:</label>
+                <input type="file" id="audioFile" accept="audio/*" required>
+                
+                <button type="submit" id="analyzeBtn">Analyze My Speech</button>
+                <div id="loading">
+                    Analyzing... This may take a moment. 
+                    <br>(Whisper transcription can be slow on large files!)
+                </div>
+                <div id="error"></div>
+            </form>
+        </div>
+
+        <div id="reviewScreen" class="page">
+            <h1>🎙️ Your Speech Analysis</h1>
+            
+            <div id="starRating"></div>
+            
+            <pre id="reportContainer"></pre>
+
+            <div id="visualFeedback">
+                <h2>Detailed Analysis</h2>
+                
+                <h3>Pacing (Words Per Minute)</h3>
+                <p style="font-size: 1em; color: #666;">This graph shows your speaking pace over time. A good conversational pace is typically between 130-160 WPM.</p>
+                <div style="width: 100%; height: 300px; margin-top: 15px;">
+                    <canvas id="pacingChart"></canvas>
+                </div>
+                
+                <h3>Filler Word Count</h3>
+                <p style="font-size: 1em; color: #666;">A high count of filler words can reduce clarity. Here's your breakdown:</p>
+                <div id="fillerWordContainer">
+                    </div>
+            </div>
+            <hr style="margin-top: 30px;">
+            <p id="timeTaken" style="text-align: center; color: #777;"></p>
+            <button id="startOverBtn">Analyze Another</button>
+        </div>
+    </div>
+
+    <script>
+        // --- State and DOM Elements ---
+        let userApiKey = '';
+        let pacingChart = null; // *** NEW: Global var for the chart ***
+
+        const apiKeyScreen = document.getElementById('apiKeyScreen');
+        const uploadScreen = document.getElementById('uploadScreen');
+        const reviewScreen = document.getElementById('reviewScreen');
+
+        const apiKeyInput = document.getElementById('apiKey');
+        const submitKeyBtn = document.getElementById('submitKeyBtn');
+        
+        const uploadForm = document.getElementById('uploadForm');
+        const audioFile = document.getElementById('audioFile');
+        const audienceInput = document.getElementById('audience');
+        const analyzeBtn = document.getElementById('analyzeBtn');
+        const loading = document.getElementById('loading');
+        const error = document.getElementById('error');
+
+        const reportContainer = document.getElementById('reportContainer');
+        const starRatingContainer = document.getElementById('starRating');
+        const timeTaken = document.getElementById('timeTaken');
+        const startOverBtn = document.getElementById('startOverBtn');
+        
+        // *** NEW: Get new elements ***
+        const fillerWordContainer = document.getElementById('fillerWordContainer');
+        const pacingChartCanvas = document.getElementById('pacingChart');
+
+        // --- Event Listeners ---
+
+        // Step 1: Submit API Key
+        submitKeyBtn.onclick = () => {
+            if (apiKeyInput.value.trim() === '') {
+                alert('Please enter an API key.');
+                return;
+            }
+            userApiKey = apiKeyInput.value.trim();
+            apiKeyScreen.style.display = 'none';
+            uploadScreen.style.display = 'block';
+        };
+
+        // Step 2: Submit Audio File
+        uploadForm.onsubmit = async (e) => {
+            e.preventDefault();
+            
+            if (audioFile.files.length === 0) {
+                alert('Please select an audio file.');
+                return;
+            }
+
+            loading.style.display = 'block';
+            error.textContent = '';
+            error.style.display = 'none';
+            analyzeBtn.disabled = true;
+
+            const formData = new FormData();
+            formData.append('api_key', userApiKey);
+            formData.append('audio_file', audioFile.files[0]);
+            formData.append('audience', audienceInput.value);
+
+            try {
+                const response = await fetch('/analyze', {
+                    method: 'POST',
+                    body: formData,
+                });
+
+                const result = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(result.error || 'Unknown error occurred');
+                }
+
+                // --- Success! Populate all fields ---
+                reportContainer.textContent = result.report;
+                timeTaken.textContent = `Total analysis time: ${result.time_taken} seconds`;
+                
+                displayStars(result.star_rating);
+                
+                // *** NEW: Call functions to display new data ***
+                displayFillerWords(result.filler_counts);
+                displayPacingChart(result.pacing_data);
+                
+                uploadScreen.style.display = 'none';
+                reviewScreen.style.display = 'block';
+
+            } catch (err) {
+                error.textContent = `Error: ${err.message}`;
+                error.style.display = 'block';
+            } finally {
+                loading.style.display = 'none';
+                analyzeBtn.disabled = false;
+                uploadForm.reset();
+            }
+        };
+
+        // Step 3: Start Over
+        startOverBtn.onclick = () => {
+            reviewScreen.style.display = 'none';
+            uploadScreen.style.display = 'block';
+            // Clear old results
+            reportContainer.textContent = '';
+            starRatingContainer.innerHTML = '';
+            timeTaken.textContent = '';
+            
+            // *** NEW: Clear visual feedback ***
+            fillerWordContainer.innerHTML = '';
+            if (pacingChart) {
+                pacingChart.destroy(); // Destroy the old chart
+                pacingChart = null;
+            }
+        };
+
+        // --- Helper Functions ---
+        
+        function displayStars(rating) {
+            const ratingNum = parseFloat(rating) || 0;
+            const roundedFull = Math.round(ratingNum);
+            let starsHTML = '';
+            for (let i = 0; i < roundedFull; i++) {
+                 starsHTML += '⭐';
+            }
+            for (let i = roundedFull; i< 5; i++) {
+                starsHTML += '<span class="empty-star">☆</span>';
+            }
+            starRatingContainer.innerHTML = starsHTML;
+        }
+
+        // *** NEW: Function to display filler words ***
+        function displayFillerWords(counts) {
+            if (!counts || counts.total === 0) {
+                fillerWordContainer.innerHTML = "<p>No significant filler words detected. Great job!</p>";
+                return;
+            }
+            
+            let html = `<p style="font-size: 1.2em; color: #000;"><strong>Total Fillers: ${counts.total}</strong></p><ul>`;
+            for (const word in counts) {
+                if (word !== 'total' && counts[word] > 0) {
+                    html += `<li><strong>${word}:</strong> ${counts[word]}</li>`;
+                }
+            }
+            html += '</ul>';
+            fillerWordContainer.innerHTML = html;
+        }
+
+        // *** NEW: Function to display pacing chart ***
+        function displayPacingChart(data) {
+            if (pacingChart) {
+                pacingChart.destroy();
+            }
+            
+            if (!data || data.length === 0) {
+                // Handle cases with no data
+                return;
+            }
+
+            const ctx = pacingChartCanvas.getContext('2d');
+            
+            const labels = data.map(d => d.time.toFixed(1) + 's');
+            const wpmValues = data.map(d => d.wpm.toFixed(0));
+
+            pacingChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Words Per Minute',
+                        data: wpmValues,
+                        borderColor: '#007aff',
+                        backgroundColor: 'rgba(0,122,255,0.1)',
+                        fill: true,
+                        tension: 0.2 // Makes it slightly curved
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: { display: true, text: 'Words Per Minute (WPM)' }
+                        },
+                        x: {
+                            title: { display: true, text: 'Time (in seconds)' }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
+        }
+
+    </script>
+</body>
+</html>
