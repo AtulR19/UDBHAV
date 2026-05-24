@@ -5,6 +5,7 @@ ENV PYTHONUNBUFFERED=1
 ENV PIP_NO_CACHE_DIR=1
 ENV XDG_CACHE_HOME=/app/.cache
 ENV PORT=3000
+ENV WHISPER_MODEL=tiny
 
 WORKDIR /app
 
@@ -19,7 +20,7 @@ RUN python -m pip install --upgrade pip \
 COPY . .
 
 RUN test -f models/speech_score_model.json || python train_model.py \
-    && python -c "import whisper; whisper.load_model('base', download_root='/app/.cache/whisper')"
+    && python -c "import os, whisper; whisper.load_model(os.environ.get('WHISPER_MODEL', 'tiny'), download_root='/app/.cache/whisper')"
 
 EXPOSE 3000
 

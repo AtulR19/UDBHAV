@@ -74,7 +74,8 @@ http://localhost:3000
 ## Deploy
 
 The recommended deployment path is Docker because the app needs Python, Torch, Whisper, and FFmpeg.
-The included Docker image installs FFmpeg, installs Python dependencies, keeps your trained local model, and caches the Whisper base model during build.
+The included Docker image installs FFmpeg, installs Python dependencies, keeps your trained local model, and caches the Whisper model during build.
+The default deployment model is `tiny` Whisper to reduce memory usage. For better transcription quality on larger machines, set `WHISPER_MODEL=base`.
 
 ### Deploy On Render
 
@@ -144,4 +145,5 @@ models/                Trained local model artifacts
 - No Gemini key or external LLM API is required.
 - The included local model is a practical bootstrap model. For production-quality coaching, collect real speeches with human ratings and retrain with `train_model.py --data`.
 - Large audio files can take several minutes depending on CPU/GPU speed.
+- If a host runs out of memory, keep `WHISPER_MODEL=tiny` or choose a service with at least 2 GB RAM.
 - Browser microphone recording requires HTTPS or localhost.

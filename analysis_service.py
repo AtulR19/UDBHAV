@@ -14,6 +14,8 @@ import time
 
 from local_speech_model import analyze_with_local_model
 
+WHISPER_MODEL_NAME = os.environ.get("WHISPER_MODEL", "tiny")
+
 FILLER_WORDS = {
     'um', 'uh', 'like', 'so', 'you know', 'actually', 'basically', 'right',
     'literally', 'i mean', 'kind of', 'sort of', 'well'
@@ -23,22 +25,27 @@ def load_whisper_model():
     device = "cuda" if torch.cuda.is_available() else "cpu"
     print(f"Using device: {device}")
     try:
-        model = whisper.load_model("base", device=device)
-        print("Whisper 'base' model loaded successfully.")
+        model = whisper.load_model(WHISPER_MODEL_NAME, device=device)
+        print(f"Whisper '{WHISPER_MODEL_NAME}' model loaded successfully.")
         return model
     except Exception as e:
         print(f"Failed to load Whisper model: {e}")
         return None
 
-whisper_model = load_whisper_model()
-if whisper_model is None:
-    print("CRITICAL: Could not load Whisper model. Exiting.")
-    exit(1)
+whisper_model = None
 
 class SpeechAnalysisError(Exception):
     def __init__(self, message, status_code=500):
         super().__init__(message)
         self.status_code = status_code
+
+def get_whisper_model():
+    global whisper_model
+    if whisper_model is None:
+        whisper_model = load_whisper_model()
+    if whisper_model is None:
+        raise SpeechAnalysisError("Could not load Whisper transcription model.", 500)
+    return whisper_model
 
 def process_audio_file(audio_file_path):
     try:
@@ -50,7 +57,7 @@ def process_audio_file(audio_file_path):
 
     try:
         print("Transcribing audio...")
-        result = whisper_model.transcribe(audio_file_path, fp16=torch.cuda.is_available())
+        result = get_whisper_model().transcribe(audio_file_path, fp16=torch.cuda.is_available())
         
         full_transcript = result.get("text", "")
         if not full_transcript:
