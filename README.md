@@ -119,6 +119,24 @@ http://localhost:3000
 
 For platforms such as Railway, Fly.io, Azure Container Apps, or Google Cloud Run, deploy the Dockerfile and expose the platform-provided `PORT` environment variable.
 
+### Deploy On Streamlit Community Cloud
+
+This repo also includes a Streamlit entry point for a simpler cloud deploy.
+
+1. Go to [Streamlit Community Cloud](https://share.streamlit.io/).
+2. Click **Create app**.
+3. Choose the GitHub repo `AtulR19/UDBHAV`.
+4. Set the branch to `main`.
+5. Set the main file path to:
+
+```text
+streamlit_app.py
+```
+
+6. Deploy.
+
+Streamlit will install Python dependencies from `requirements.txt` and install FFmpeg from `packages.txt`.
+
 ## Usage
 
 1. Pick a target audience and speech goal.
@@ -130,11 +148,13 @@ For platforms such as Railway, Fly.io, Azure Container Apps, or Google Cloud Run
 
 ```text
 app.py                 Flask entry point for the full web app
+streamlit_app.py       Streamlit entry point for Streamlit Community Cloud
 index.html             Frontend UI and browser recording logic
 analysis_service.py    Whisper transcription and local analysis workflow
 local_speech_model.py  Local scoring model, features, feedback, and trainer helpers
 train_model.py         Command line model training script
 requirements.txt       Python dependencies
+packages.txt           Streamlit Cloud system dependency list
 Dockerfile             Production container with FFmpeg and Whisper support
 render.yaml            Render Blueprint deployment config
 models/                Trained local model artifacts

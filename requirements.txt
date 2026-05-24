@@ -2,4 +2,5 @@ Flask
 gunicorn
 openai-whisper
 pydub
+streamlit>=1.56.0
 torch
