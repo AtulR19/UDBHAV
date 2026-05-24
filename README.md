@@ -136,6 +136,8 @@ streamlit_app.py
 6. Deploy.
 
 Streamlit will install Python dependencies from `requirements.txt` and install FFmpeg from `packages.txt`.
+In **Advanced settings**, choose Python 3.12 for the smoothest dependency compatibility. Streamlit Community Cloud selects Python from its deployment UI, so `runtime.txt` should not be treated as the Python-version control for Streamlit.
+If the app is already deployed on Python 3.13 or newer, the `audioop-lts` compatibility dependency lets `pydub` work with newer Python versions where the old `audioop` module was removed.
 
 ## Usage
 
