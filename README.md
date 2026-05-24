@@ -73,7 +73,8 @@ http://localhost:3000
 
 ## Deploy
 
-The recommended deployment path is Docker because the app needs Python, Torch, Whisper, and FFmpeg. The included Docker image installs FFmpeg, installs Python dependencies, keeps your trained local model, and caches the Whisper base model during build.
+The recommended deployment path is Docker because the app needs Python, Torch, Whisper, and FFmpeg.
+The included Docker image installs FFmpeg, installs Python dependencies, keeps your trained local model, and caches the Whisper base model during build.
 
 ### Deploy On Render
 

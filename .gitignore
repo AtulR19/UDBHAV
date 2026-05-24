@@ -2,3 +2,7 @@ __pycache__/
 *.py[cod]
 .venv/
 node_modules/
+.cache/
+.pytest_cache/
+.env
+*.log

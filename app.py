@@ -71,8 +71,9 @@ def analyze_speech():
 
 
 def main():
-    print("Starting UDBHAV Speech Coach on http://localhost:3000")
-    app.run(host="0.0.0.0", port=3000)
+    port = int(os.environ.get("PORT", "3000"))
+    print(f"Starting UDBHAV Speech Coach on http://localhost:{port}")
+    app.run(host="0.0.0.0", port=port)
 
 
 if __name__ == "__main__":
