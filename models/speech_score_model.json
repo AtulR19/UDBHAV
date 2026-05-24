@@ -1,0 +1,52 @@
+{
+  "version": "local-linear-speech-coach-v1",
+  "feature_names": [
+    "pace_quality",
+    "filler_control",
+    "pacing_consistency",
+    "structure_signal",
+    "lexical_range",
+    "sentence_control",
+    "duration_fit",
+    "audience_context",
+    "goal_signal"
+  ],
+  "means": {
+    "pace_quality": 0.5273663042594199,
+    "filler_control": 0.5275329093526514,
+    "pacing_consistency": 0.5247540226568959,
+    "structure_signal": 0.5194857242812888,
+    "lexical_range": 0.5250836502388533,
+    "sentence_control": 0.5325815649171691,
+    "duration_fit": 0.5306975130026883,
+    "audience_context": 0.5171045243702745,
+    "goal_signal": 0.5180655775743872
+  },
+  "stds": {
+    "pace_quality": 0.22633555910336295,
+    "filler_control": 0.22363649134079383,
+    "pacing_consistency": 0.2235737136390837,
+    "structure_signal": 0.22623185399860216,
+    "lexical_range": 0.2251809437938342,
+    "sentence_control": 0.23050130665421756,
+    "duration_fit": 0.22667198742491138,
+    "audience_context": 0.22979086314165006,
+    "goal_signal": 0.2265138258151458
+  },
+  "weights": {
+    "pace_quality": 0.14725405746693798,
+    "filler_control": 0.13165373057915367,
+    "pacing_consistency": 0.09776201135596778,
+    "structure_signal": 0.11856226279674584,
+    "lexical_range": 0.08241675542433084,
+    "sentence_control": 0.09135223133201027,
+    "duration_fit": 0.06864848053772697,
+    "audience_context": 0.07228283462207082,
+    "goal_signal": 0.07630958244416178
+  },
+  "bias": 3.1011001154713544,
+  "training": {
+    "records": 1600,
+    "source": "bootstrap synthetic labels"
+  }
+}
